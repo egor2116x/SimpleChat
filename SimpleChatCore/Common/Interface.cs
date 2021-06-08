@@ -7,10 +7,23 @@ namespace ChatCore.Common
 {
     public interface IUserInputHandler
     {
-        void Handle();
-        void Stop();
+        void ReadUserInput();
+        void StopReadUserInput();
+    }
+
+    public interface IUserInputCommandHandler
+    {
         uint GetCommand();
     }
+
+    public interface IUserInputMessageHandler
+    {
+        Queue<string> GetMessage();
+    }
+
+    public interface IClientInputHandler : IUserInputHandler, IUserInputCommandHandler, IUserInputMessageHandler {}
+
+    public interface IServerInputHandler : IUserInputHandler, IUserInputCommandHandler {}
 
     public interface IUserInputListener
     {

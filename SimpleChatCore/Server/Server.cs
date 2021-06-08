@@ -22,12 +22,12 @@ namespace ChatCore.Server
             public TcpClient client { set; get; }
         }
 
-        public Server(IPAddress addr, Int32 port, IUserInputHandler uih, IProtocol p)
+        public Server(IPAddress addr, Int32 port, IServerInputHandler ih, IProtocol p)
         {
             m_addr = addr;
             m_port = port;
             m_clients = new List<Connection>();
-            m_userInputHandler = uih;
+            m_inputHandler = ih;
             m_protocol = p;
         }
 
@@ -35,7 +35,7 @@ namespace ChatCore.Server
         {
             server = new TcpListener(m_addr, m_port);
             server.Start();
-            m_userInputHandler.Handle();
+            m_inputHandler.ReadUserInput();
             Task<bool> listenUserCommandTask = ListenUserCommand();
 
             while (!m_needStop)
@@ -50,7 +50,7 @@ namespace ChatCore.Server
                 StartClientThread(cc);
             }
 
-            Task<bool>.WaitAny(listenUserCommandTask);
+            Task.WaitAny(listenUserCommandTask);
 
             if (listenUserCommandTask.IsCompleted)
                 Console.WriteLine("Listening user command task completed");
@@ -59,7 +59,6 @@ namespace ChatCore.Server
         private async void StartClientThread(Connection connection)
         {
             await Task.Run(() => {
-
                 Byte[] bytes = new Byte[Protocol.MaxPackageSize];
                 String data = null;
                 NetworkStream stream = connection.client.GetStream();
@@ -88,7 +87,7 @@ namespace ChatCore.Server
             return Task.Run(() => {
                 while (!m_needStop)
                 {
-                    SERVER_USER_INPUT userInput = (SERVER_USER_INPUT)m_userInputHandler.GetCommand();
+                    SERVER_USER_INPUT userInput = (SERVER_USER_INPUT)m_inputHandler.GetCommand();
                     if (userInput == SERVER_USER_INPUT.STOP)
                     {
                         m_needStop = true;
@@ -119,7 +118,7 @@ namespace ChatCore.Server
         private Int32 m_port = 0;
         private TcpListener server = null;
         private List<Connection> m_clients = null;
-        private IUserInputHandler m_userInputHandler = null;
+        private IServerInputHandler m_inputHandler = null;
         private bool m_needStop = false;
         private IProtocol m_protocol = null;
     }

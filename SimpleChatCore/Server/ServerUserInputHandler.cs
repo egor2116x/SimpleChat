@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChatCore.Server
 {
-    public class ServerUserInputHandler : IUserInputHandler
+    public class ServerUserInputHandler : IServerInputHandler
     {
         public uint GetCommand()
         {
@@ -15,7 +15,7 @@ namespace ChatCore.Server
             return last;
         }
 
-        public async void Handle()
+        public async void ReadUserInput()
         {
             await Task.Run(() =>
             {
@@ -28,7 +28,7 @@ namespace ChatCore.Server
 
                     if (line.Contains(Command.shortStop) || line.Contains(Command.Stop))
                     {
-                        Stop();
+                        StopReadUserInput();
                         continue;
                     }
 
@@ -37,7 +37,7 @@ namespace ChatCore.Server
             });
         }
 
-        public void Stop()
+        public void StopReadUserInput()
         {
             m_stop = true;
             m_lastCommand = SERVER_USER_INPUT.STOP;

@@ -23,7 +23,7 @@ namespace SimpleChat
                         client.Connect();
                         break;
                     case CmdParser.MODE.SERVER:
-                        Server server = new Server(IPAddress.Parse(cmd.address), cmd.port, new ClientUserInputHandler(), new Protocol());
+                        Server server = new Server(IPAddress.Parse(cmd.address), cmd.port, new ServerUserInputHandler(), new Protocol());
                         server.Listen();
                         break;
                     default:

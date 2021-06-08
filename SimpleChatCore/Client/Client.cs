@@ -10,13 +10,13 @@ namespace ChatCore.Client
 {
     public class Client : IUserInputListener, IOHandler
     {
-        public Client(string addr, Int32 port, ClientUserInputHandler uih, IProtocol p)
+        public Client(string addr, Int32 port, IClientInputHandler ih, IProtocol p)
         {
             m_serverAddr = addr;
             m_serverPort = port;
-            m_inputHandler = uih;
+            m_inputHandler = ih;
             m_protocol = p;
-        }
+    }
 
         public void Connect()
         {
@@ -36,13 +36,13 @@ namespace ChatCore.Client
                 throw new ClientException(string.Format("Connect to server {0}:{1} failed", m_serverAddr, m_serverPort));
 
             Console.WriteLine("Successful server connection");
-            m_inputHandler.Handle();
+            m_inputHandler.ReadUserInput();
 
             Task<bool> listenUserCommandTask = ListenUserCommand();
             Task<bool> sendTask = Send();
             Task<bool> readTask = Read();
 
-            Task<bool>.WaitAny(listenUserCommandTask, sendTask, readTask);
+            Task.WaitAny(listenUserCommandTask, sendTask, readTask);
 
             if (listenUserCommandTask.IsCompleted)
                 Console.WriteLine("Listening user command task completed");
@@ -113,7 +113,7 @@ namespace ChatCore.Client
         private string m_serverAddr = string.Empty;
         private Int32 m_serverPort = 0;
         private TcpClient m_client = null;
-        private ClientUserInputHandler m_inputHandler = null;
+        private IClientInputHandler m_inputHandler = null;
         private bool m_needStop = false;
         private IProtocol m_protocol = null;
     }
